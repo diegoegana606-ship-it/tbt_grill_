@@ -695,7 +695,7 @@ body.ready .toro{animation:pop3 1.2s cubic-bezier(.2,1.3,.4,1) .1s both}
         <label for="accEmail">Correo</label><input id="accEmail" type="email" autocomplete="username" inputmode="email" required>
         <label for="accPass">Contraseña</label><input id="accPass" type="password" autocomplete="current-password" required>
         <label for="accClave">Clave especial</label><input id="accClave" type="password" autocomplete="off" required>
-        <p class="acc-n" id="accPrimera" hidden>Primera vez: la clave especial que escribas quedará guardada como la clave del panel.</p>
+        <p class="acc-n" id="accPrimera" hidden>Primera vez: el correo, la contraseña (mínimo 6 caracteres) y la clave especial que escribas quedarán guardados como el acceso del encargado.</p>
         <button type="submit" class="btn fill" id="accBtn">Entrar</button>
         <p class="acc-m" id="accMsg" role="alert"></p>
       </form>
@@ -962,6 +962,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)cargarRemo
     if(!em||!pw||!cl){msg.textContent='Completa los tres campos.';return}
     const b=$('accBtn');b.disabled=true;b.textContent='Verificando…';msg.textContent='';
     try{
+      const primera=!(await SB.rpc('hay_admin').catch(()=>true));
+      if(primera){try{await SB.rpc('crear_primer_admin',{correo:em,contrasena:pw})}catch(err){if(err.status!==404)throw new Error(err.message||'No se pudo crear el acceso.')}}
       try{await SB.login(em.toLowerCase(),pw)}catch(err){const m=String(err.message||'');throw new Error(/confirm/i.test(m)?'Ese correo no está confirmado en Supabase (Authentication → Users).':err.status===400||err.status===401?'Correo o contraseña incorrectos. ('+m+')':'No hay conexión con Supabase. Revisa tu internet. ('+m+')')}
       let r;
       if(!(await SB.rpc('hay_admin'))){await SB.rpc('registrar_primer_admin',{clave:cl});r='ok'}
