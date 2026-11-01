@@ -962,7 +962,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)cargarRemo
     if(!em||!pw||!cl){msg.textContent='Completa los tres campos.';return}
     const b=$('accBtn');b.disabled=true;b.textContent='Verificando…';msg.textContent='';
     try{
-      try{await SB.login(em,pw)}catch(err){throw new Error(err.status===400?'Correo o contraseña incorrectos.':'No hay conexión. Revisa tu internet.')}
+      try{await SB.login(em.toLowerCase(),pw)}catch(err){const m=String(err.message||'');throw new Error(/confirm/i.test(m)?'Ese correo no está confirmado en Supabase (Authentication → Users).':err.status===400||err.status===401?'Correo o contraseña incorrectos. ('+m+')':'No hay conexión con Supabase. Revisa tu internet. ('+m+')')}
       let r;
       if(!(await SB.rpc('hay_admin'))){await SB.rpc('registrar_primer_admin',{clave:cl});r='ok'}
       else r=await SB.rpc('verificar_clave',{clave:cl});
